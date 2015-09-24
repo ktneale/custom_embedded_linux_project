@@ -1,0 +1,27 @@
+qemu-system-x86_64 -m 64 -hda images/rootfs_ext2.img -kernel images/bzImage -append "root=/dev/sda init=/sbin/init"
+
+
+dd if=/dev/zero of=rootfs2.img bs=1k count=8000
+mkfs.ext3 -i 1024 -F rootfs2.img
+sudo mount -o loop ./rootfs2.img ./mnt_point2/
+sudo rsync -a busybox-1.23.2/_install/ ./mnt_point2/
+sudo chown -R root:root ./mnt_point2
+
+Mounting /proc:
+mount -t proc none /proc
+Mounting /sys:
+mount -t sysfs none /sys
+
+#to mount a rootfs a read/write
+mount -o remount,rw /
+
+
+
+#To fix disk errors
+e2fsck -f /dev/sda1
+
+#Create a username for root on a blank system
+echo root:x:0:0:root:/root:/bin/sh > /etc/passwd
+chmod 755 /etc/passwd
+
+ x11vnc -auth /var/run/lightdm/root/:0 -forever
